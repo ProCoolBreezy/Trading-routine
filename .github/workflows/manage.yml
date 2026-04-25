@@ -1,0 +1,53 @@
+name: Trading bot — manage
+
+on:
+  schedule:
+    # 10am, 11am, 12pm, 1pm, 2pm, 3pm ET on weekdays (UTC = ET + 4 in EDT)
+    - cron: '0 14-19 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trading-bot-journal
+  cancel-in-progress: false
+
+jobs:
+  manage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Write .env from secrets
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: |
+          {
+            echo "ALPACA_API_KEY=$ALPACA_API_KEY"
+            echo "ALPACA_SECRET_KEY=$ALPACA_SECRET_KEY"
+            echo "LIVE_TRADING=false"
+          } > .env
+
+      - run: python bot.py manage
+
+      - name: Persist journal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f journal.db
+          if git diff --cached --quiet; then
+            echo "no journal changes"
+          else
+            git commit -m "chore: journal after manage [skip ci]"
+            git pull --rebase origin main
+            git push
+          fi
