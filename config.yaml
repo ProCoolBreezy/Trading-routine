@@ -1,0 +1,66 @@
+# Trading plan parameters. Edit to tune the strategy.
+
+account:
+  # Starting equity reference for journal/backtest. Live equity is queried from broker.
+  initial_equity: 10000
+
+risk:
+  # Fraction of equity risked per trade (1% = 0.01).
+  per_trade_pct: 0.01
+  # Maximum concurrent open positions.
+  max_open_trades: 2
+  # Weekly drawdown threshold that pauses new entries (5% = 0.05).
+  weekly_drawdown_halt: 0.05
+  # ATR multiplier for initial stop distance.
+  atr_stop_mult: 2.0
+  # Lookback (bars) used to locate the swing low for stop placement.
+  swing_low_lookback: 20
+
+targets:
+  # Partial scale-out at this risk-reward multiple.
+  partial_rr: 1.0
+  partial_fraction: 0.5
+  # Trailing stop uses max of (atr_trail_mult * ATR, 20 EMA).
+  atr_trail_mult: 2.0
+  # Tighten to this ATR multiple when trend is strong (ADX > adx_strong).
+  atr_trail_mult_strong: 1.0
+  adx_strong: 35
+
+indicators:
+  ema_fast: 50
+  ema_slow: 200
+  ema_trail: 20
+  rsi_period: 14
+  rsi_entry_min: 50
+  rsi_exit_max: 40
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  adx_period: 14
+  adx_min: 25
+  atr_period: 14
+  # Pullback proximity: entry valid if price within this fraction of 50 EMA.
+  pullback_tolerance: 0.02
+
+confluence:
+  # Require at least N of the 4H entry conditions to be true.
+  min_conditions: 2
+
+watchlist:
+  # Liquid US stocks / ETFs. Edit freely.
+  - SPY
+  - QQQ
+  - MSFT
+  - AAPL
+  - NVDA
+  - GOOGL
+  - AMZN
+  - META
+  - XLK
+  - IWM
+
+data:
+  # Bars needed for 200 EMA on daily + buffer.
+  daily_lookback_days: 400
+  # Bars needed for 4H indicators + 50 EMA buffer.
+  fourhour_lookback_days: 120
